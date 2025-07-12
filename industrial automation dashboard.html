@@ -1,0 +1,397 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrial Automation Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #1e40af;
+            --danger: #dc2626;
+            --warning: #f59e0b;
+            --success: #10b981;
+        }
+        
+        .grid-bg {
+            background-image: 
+                linear-gradient(rgba(156, 163, 175, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(156, 163, 175, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        .equipment-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .equipment-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        
+        .status-running {
+            background-color: var(--success);
+            box-shadow: 0 0 10px var(--success);
+        }
+        
+        .status-warning {
+            background-color: var(--warning);
+            box-shadow: 0 0 10px var(--warning);
+        }
+        
+        .status-stopped {
+            background-color: var(--danger);
+            box-shadow: 0 0 10px var(--danger);
+        }
+        
+        .status-maintenance {
+            background-color: #6b7280;
+            box-shadow: 0 0 10px #6b7280;
+        }
+        
+        .alert-high {
+            border-left-color: var(--danger) !important;
+        }
+        
+        .alert-medium {
+            border-left-color: var(--warning) !important;
+        }
+        
+        .alert-low {
+            border-left-color: #3b82f6 !important;
+        }
+        
+        .gauge-container {
+            position: relative;
+            width: 100%;
+            height: 120px;
+        }
+        
+        .notification-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white grid-bg min-h-screen">
+    <div class="container mx-auto px-4 py-6">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold">Industrial Automation Dashboard</h1>
+                <p class="text-gray-400">Manufacturing Plant Control Center</p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg flex items-center">
+                        <i class="fas fa-bell mr-2"></i>
+                        <span>Alerts</span>
+                        <span class="absolute -top-2 -right-2 bg-red-500 text-xs rounded-full h-5 w-5 flex items-center justify-center notification-pulse">3</span>
+                    </button>
+                </div>
+                <div class="bg-gray-800 px-4 py-2 rounded-lg">
+                    <span class="text-gray-300">Shift: </span>
+                    <span class="font-medium">Morning (06:00 - 14:00)</span>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Key Metrics -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Production Output -->
+            <div class="bg-gray-800 rounded-lg p-4 shadow-lg">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-400">Production Output</p>
+                        <p class="text-2xl font-bold">1,247 <span class="text-lg text-gray-400">units</span></p>
+                        <p class="text-green-400 text-sm flex items-center">
+                            <i class="fas fa-arrow-up mr-1"></i> 12% from yesterday
+                        </p>
+                    </div>
+                    <div class="bg-blue-600/20 p-3 rounded-lg">
+                        <i class="fas fa-boxes text-blue-400 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4 h-2 bg-gray-700 rounded-full overflow-hidden">
+                    <div class="h-full bg-blue-500 rounded-full" style="width: 78%"></div>
+                </div>
+                <p class="text-xs text-gray-400 mt-1">78% of daily target</p>
+            </div>
+            
+            <!-- Energy Consumption -->
+            <div class="bg-gray-800 rounded-lg p-4 shadow-lg">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-400">Energy Consumption</p>
+                        <p class="text-2xl font-bold">4.8 <span class="text-lg text-gray-400">MWh</span></p>
+                        <p class="text-red-400 text-sm flex items-center">
+                            <i class="fas fa-arrow-up mr-1"></i> 5% from yesterday
+                        </p>
+                    </div>
+                    <div class="bg-yellow-600/20 p-3 rounded-lg">
+                        <i class="fas fa-bolt text-yellow-400 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4 h-2 bg-gray-700 rounded-full overflow-hidden">
+                    <div class="h-full bg-yellow-500 rounded-full" style="width: 65%"></div>
+                </div>
+                <p class="text-xs text-gray-400 mt-1">65% of daily limit</p>
+            </div>
+            
+            <!-- Quality Yield -->
+            <div class="bg-gray-800 rounded-lg p-4 shadow-lg">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-400">Quality Yield</p>
+                        <p class="text-2xl font-bold">98.4 <span class="text-lg text-gray-400">%</span></p>
+                        <p class="text-green-400 text-sm flex items-center">
+                            <i class="fas fa-arrow-up mr-1"></i> 0.7% from yesterday
+                        </p>
+                    </div>
+                    <div class="bg-green-600/20 p-3 rounded-lg">
+                        <i class="fas fa-check-circle text-green-400 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex justify-between text-xs text-gray-400">
+                        <span>Target: 97.5%</span>
+                        <span>Defects: 1.6%</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- OEE -->
+            <div class="bg-gray-800 rounded-lg p-4 shadow-lg">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-400">Overall Equipment Effectiveness</p>
+                        <p class="text-2xl font-bold">84.2 <span class="text-lg text-gray-400">%</span></p>
+                        <p class="text-green-400 text-sm flex items-center">
+                            <i class="fas fa-arrow-up mr-1"></i> 2.1% from last week
+                        </p>
+                    </div>
+                    <div class="bg-purple-600/20 p-3 rounded-lg">
+                        <i class="fas fa-tachometer-alt text-purple-400 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex justify-between text-xs text-gray-400">
+                        <span>Availability: 92%</span>
+                        <span>Performance: 89%</span>
+                        <span>Quality: 98.4%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Production Trend -->
+            <div class="lg:col-span-2 bg-gray-800 rounded-lg p-4 shadow-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold">Production Trend</h2>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 bg-gray-700 rounded-lg text-sm">Hourly</button>
+                        <button class="px-3 py-1 bg-blue-600 rounded-lg text-sm">Daily</button>
+                        <button class="px-3 py-1 bg-gray-700 rounded-lg text-sm">Weekly</button>
+                    </div>
+                </div>
+                <div class="h-64">
+                    <canvas id="productionChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Alerts -->
+            <div class="bg-gray-800 rounded-lg p-4 shadow-lg">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold">Recent Alerts</h2>
+                    <button class="text-blue-400 text-sm">View All</button>
+                </div>
+                <div class="space-y-3">
+                    <div class="alert-high bg-gray-700 p-3 rounded-lg equipment-card">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-medium flex items-center">
+                                    <span class="status-indicator status-warning"></span>
+                                    High Temperature Warning
+                                </h3>
+                                <p class="text-sm text-gray-400">Extruder Machine #3</p>
+                            </div>
+                            <span class="text-xs text-red-400">10 min ago</span>
+                        </div>
+                        <p class="text-sm mt-2">Temperature reached 248°C (threshold: 240°C)</p>
+                    </div>
+                    
+                    <div class="alert-medium bg-gray-700 p-3 rounded-lg equipment-card">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-medium flex items-center">
+                                    <span class="status-indicator status-warning"></span>
+                                    Vibration Alert
+                                </h3>
+                                <p class="text-sm text-gray-400">Conveyor Belt B2</p>
+                            </div>
+                            <span class="text-xs text-yellow-400">25 min ago</span>
+                        </div>
+                        <p class="text-sm mt-2">Vibration level at 6.2 m/s² (threshold: 5.8 m/s²)</p>
+                    </div>
+                    
+                    <div class="alert-low bg-gray-700 p-3 rounded-lg equipment-card">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-medium flex items-center">
+                                    <span class="status-indicator status-running"></span>
+                                    Maintenance Reminder
+                                </h3>
+                                <p class="text-sm text-gray-400">Packaging Line #1</p>
+                            </div>
+                            <span class="text-xs text-blue-400">1 hour ago</span>
+                        </div>
+                        <p class="text-sm mt-2">Scheduled maintenance due in 12 hours</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Equipment Status -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Equipment Status</h2>
+                <div class="flex space-x-2">
+                    <button class="px-3 py-1 bg-gray-700 rounded-lg text-sm flex items-center">
+                        <span class="status-indicator status-running mr-1"></span>
+                        Running (8)
+                    </button>
+                    <button class="px-3 py-1 bg-gray-700 rounded-lg text-sm flex items-center">
+                        <span class="status-indicator status-warning mr-1"></span>
+                        Warning (2)
+                    </button>
+                    <button class="px-3 py-1 bg-gray-700 rounded-lg text-sm flex items-center">
+                        <span class="status-indicator status-stopped mr-1"></span>
+                        Stopped (1)
+                    </button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Equipment Card 1 -->
+                <div class="bg-gray-800 rounded-lg p-4 shadow-lg equipment-card">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-medium flex items-center">
+                                <span class="status-indicator status-running"></span>
+                                Injection Molder #1
+                            </h3>
+                            <p class="text-sm text-gray-400">Plastics Division</p>
+                        </div>
+                        <div class="text-xs bg-green-600/20 text-green-400 px-2 py-1 rounded">Operational</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mb-3">
+                        <div class="bg-gray-700/50 p-2 rounded">
+                            <p class="text-xs text-gray-400">Cycle Time</p>
+                            <p class="font-medium">45 <span class="text-xs text-gray-400">sec</span></p>
+                        </div>
+                        <div class="bg-gray-700/50 p-2 rounded">
+                            <p class="text-xs text-gray-400">Temp</p>
+                            <p class="font-medium">182°C</p>
+                        </div>
+                    </div>
+                    <div class="relative pt-2">
+                        <div class="flex justify-between text-xs text-gray-400 mb-1">
+                            <span>Utilization</span>
+                            <span>87%</span>
+                        </div>
+                        <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-green-500 rounded-full" style="width: 87%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Equipment Card 2 -->
+                <div class="bg-gray-800 rounded-lg p-4 shadow-lg equipment-card">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-medium flex items-center">
+                                <span class="status-indicator status-warning"></span>
+                                Extruder #3
+                            </h3>
+                            <p class="text-sm text-gray-400">Plastics Division</p>
+                        </div>
+                        <div class="text-xs bg-yellow-600/20 text-yellow-400 px-2 py-1 rounded">High Temp</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mb-3">
+                        <div class="bg-gray-700/50 p-2 rounded">
+                            <p class="text-xs text-gray-400">Output</p>
+                            <p class="font-medium">12.4 <span class="text-xs text-gray-400">kg/h</span></p>
+                        </div>
+                        <div class="bg-gray-700/50 p-2 rounded">
+                            <p class="text-xs text-gray-400">Temp</p>
+                            <p class="font-medium text-yellow-400">248°C</p>
+                        </div>
+                    </div>
+                    <div class="relative pt-2">
+                        <div class="flex justify-between text-xs text-gray-400 mb-1">
+                            <span>Utilization</span>
+                            <span>92%</span>
+                        </div>
+                        <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-yellow-500 rounded-full" style="width: 92%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Equipment Card 3 -->
+                <div class="bg-gray-800 rounded-lg p-4 shadow-lg equipment-card">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="font-medium flex items-center">
+                                <span class="status-indicator status-running"></span>
+                                CNC Mill #2
+                            </h3>
+                            <p class="text-sm text-gray-400">Metal Works</p>
+                        </div>
+                        <div class="text-xs bg-green-600/20 text-green-400 px-2 py-1 rounded">Operational</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mb-3">
+                        <div class="bg-gray-700/50 p-2 rounded">
+                            <p class="text-xs text-gray-400">Parts/Hour</p>
+                            <p class="font-medium">24</p>
+                        </div>
+                        <div class="bg-gray-700/50 p-2 rounded">
+                            <p class="text-xs text-gray-400">Tool Wear</p>
+                            <p class="font-medium">63%</p>
+                        </div>
+                    </div>
+                    <div class="relative pt-2">
+                        <div class="flex justify-between text-xs text-gray-400 mb-1">
+                            <span>Utilization</span>
+                            <span>78%</span>
+                        </div>
+                        <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-green-500 rounded-full" style="width: 78%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Equipment Card 4 -->
+                <div class="bg-gray-800 rounded-lg p-4 shadow-lg equipment-card">
+                    <div class="
